@@ -8,128 +8,160 @@
 
 import UIKit
 
-let YSLALERT_SUCCESS_COLOR = UIColor.whiteColor()
-let YSLALERT_FAILURE_COLOR = UIColor.whiteColor()
-let YSLALERT_NOTICE_COLOR = UIColor(red: 0.34902, green: 0.498039, blue: 0.521569, alpha: 1.0)
+private let YSLNoticeAlertColorSuccess = UIColor(red: 114 / 255.0, green: 209 / 255.0, blue: 142 / 255.0, alpha: 1.0)
+private let YSLNoticeAlertColorFailure = UIColor(red: 215 / 255.0, green: 104 / 255.0, blue: 91 / 255.0, alpha: 1.0)
+private let YSLNoticeAlertColorOther = UIColor(red: 89 / 255.0, green: 126 / 255.0, blue: 133 / 255.0, alpha: 1.0)
+private let YSLNoticeAleartHeight : CGFloat = 80
+private let YSLNoticeLabelMargin : CGFloat = 10
 
-
-enum YSLAlertType : Int {
+internal enum YSLAlertType : Int {
     case Success = 0
     case Failure
-    case Notice
+    case Other
 }
-
-let kAleartHeight : CGFloat = 80
-let kLabelMargin : CGFloat = 10
 
 public class YSLNoticeAlert: UIView {
     
-    var titleLabel : UILabel!
-    var subTitleLabel : UILabel!
+    static var titleFont : UIFont! = UIFont.boldSystemFontOfSize(15)
+    static var subTitleFont : UIFont! = UIFont.systemFontOfSize(13)
+    static var titleTextColor : UIColor! = UIColor.whiteColor()
+    static var subTitleTextColor : UIColor! = UIColor.whiteColor()
+    
+    private var titleLabel : UILabel!
+    private var subTitleLabel : UILabel!
+    public var callback: (()->Void)?
 
     init()
     {
         super.init(frame: CGRectZero)
+        self.commonInit()
+    }
+    
+    required public init?(coder aDecoder: NSCoder)
+    {
+        super.init(coder: aDecoder)
     }
     
     override init(frame: CGRect)
     {
         super.init(frame: frame)
-        
-        let rect = UIScreen.mainScreen().bounds
-        // title
-        titleLabel = UILabel()
-        titleLabel.frame = CGRectMake(kLabelMargin, 30, rect.size.width - (kLabelMargin * 2), 20);
-        titleLabel.textAlignment = NSTextAlignment.Center
-        titleLabel.font = UIFont.boldSystemFontOfSize(15)
-        titleLabel.textColor = UIColor.whiteColor()
-        titleLabel.text = "Hello World"
-        self.addSubview(titleLabel)
-        
-        // detail
-        subTitleLabel = UILabel()
-        subTitleLabel.frame = CGRectMake(kLabelMargin, titleLabel.frame.origin.y + titleLabel.frame.size.height, rect.size.width - (kLabelMargin * 2), 30)
-        subTitleLabel.textAlignment = NSTextAlignment.Center
-        subTitleLabel.font = UIFont.systemFontOfSize(13)
-        subTitleLabel.numberOfLines = 2
-        subTitleLabel.lineBreakMode = NSLineBreakMode.ByTruncatingTail
-        subTitleLabel.textColor = UIColor.whiteColor()
-        subTitleLabel.text = "YSLNoticeAlert Demo."
-        self.addSubview(subTitleLabel)
-        
-        let window = UIApplication.sharedApplication().windows.first as! UIWindow
-        window.addSubview(self)
-        
-        titleLabel.backgroundColor = UIColor.clearColor()
-        subTitleLabel.backgroundColor = UIColor.clearColor()
-        self.backgroundColor = YSLALERT_NOTICE_COLOR
-    }
-    
-    required public init(coder aDecoder: NSCoder)
-    {
-        super.init(coder: aDecoder)
+        self.commonInit()
     }
     
     // MARK: - Public
-    class func showAlert(#title: String, subTitle: String, alertType: YSLAlertType) {
-        self.alertView().title(title, subTitle: subTitle, alertType: alertType, color: nil)
+    internal func showAlert (title title: String?, subTitle: String?, alertType: YSLAlertType) {
+        self.title(title, subTitle: subTitle, alertType: alertType, color: nil)
     }
     
-    class func showAlert(#title: String, subTitle: String, color: UIColor) {
-        self.alertView().title(title, subTitle: subTitle, alertType: YSLAlertType.Notice, color: color)
+    internal func showAlert (title title: String?, subTitle: String?, alertType: YSLAlertType, completion: (()->Void)?) {
+        self.title(title, subTitle: subTitle, alertType: alertType, color: nil)
+        
+        if (completion != nil) {
+            self.callback = completion
+        }
+    }
+    
+    
+    internal func showAlert (title title: String?, subTitle: String?, color: UIColor) {
+        self.title(title, subTitle: subTitle, alertType: YSLAlertType.Other, color: color)
     }
 
     // MARK: - Private
-    private static func alertView () -> YSLNoticeAlert {
+    private func commonInit () {
+        
         let rect = UIScreen.mainScreen().bounds
-        return YSLNoticeAlert(frame: CGRectMake(0, -kAleartHeight, rect.size.width, kAleartHeight))
+        self.userInteractionEnabled = true
+        self.frame = CGRectMake(0, -YSLNoticeAleartHeight, rect.size.width, YSLNoticeAleartHeight)
+        titleLabel = UILabel()
+        titleLabel.frame = CGRectMake(YSLNoticeLabelMargin, 30, rect.size.width - (YSLNoticeLabelMargin * 2), 20);
+        titleLabel.textAlignment = NSTextAlignment.Center
+        titleLabel.font = YSLNoticeAlert.titleFont
+        titleLabel.textColor = YSLNoticeAlert.titleTextColor
+        titleLabel.text = ""
+        self.addSubview(titleLabel)
+        
+        subTitleLabel = UILabel()
+        subTitleLabel.frame = CGRectMake(YSLNoticeLabelMargin, titleLabel.frame.origin.y + titleLabel.frame.size.height, rect.size.width - (YSLNoticeLabelMargin * 2), 30)
+        subTitleLabel.textAlignment = NSTextAlignment.Center
+        subTitleLabel.font = YSLNoticeAlert.subTitleFont
+        subTitleLabel.textColor = YSLNoticeAlert.subTitleTextColor
+        subTitleLabel.numberOfLines = 0
+        subTitleLabel.lineBreakMode = NSLineBreakMode.ByTruncatingTail
+        subTitleLabel.text = ""
+        self.addSubview(subTitleLabel)
+        
+        let window = UIApplication.sharedApplication().windows.first
+        window!.addSubview(self)
+        
+        titleLabel.backgroundColor = UIColor.clearColor()
+        subTitleLabel.backgroundColor = UIColor.clearColor()
+        self.backgroundColor = YSLNoticeAlertColorOther
+        
+        let tapGesture = UITapGestureRecognizer(target: self, action: "dissmissAlertHandler")
+        self.addGestureRecognizer(tapGesture)
     }
     
-    private func title (title: String, subTitle: String, alertType: YSLAlertType, color: UIColor?) {
+    private func title (title: String?, subTitle: String?, alertType: YSLAlertType, color: UIColor?) {
         titleLabel.text = title
         subTitleLabel.text = subTitle
         
         switch alertType {
         case .Success:
-            self.backgroundColor = UIColor.greenColor()
+            self.backgroundColor = YSLNoticeAlertColorSuccess
         case .Failure:
-            self.backgroundColor = UIColor.redColor()
-        case .Notice:
-            self.backgroundColor = YSLALERT_NOTICE_COLOR
+            self.backgroundColor = YSLNoticeAlertColorFailure
+        case .Other:
+            self.backgroundColor = YSLNoticeAlertColorOther
         }
         
-        if (color != nil) {
+        if color != nil {
             self.backgroundColor = color
+        }
+      
+        if title == nil || title!.isEmpty {
+            subTitleLabel.frame.origin.y = (self.frame.size.height / 2)
+        }
+        
+        if subTitle ==  nil || subTitle!.isEmpty {
+            titleLabel.frame.origin.y = (self.frame.size.height / 2)
         }
         
         let rect = UIScreen.mainScreen().bounds
         // Show Animation
         UIView.animateWithDuration(0.25,delay: 0.0, options: UIViewAnimationOptions.CurveEaseInOut,
-            animations: {[unowned self] () -> Void in
-        
-            self.frame = CGRectMake(0, 0, rect.size.width, kAleartHeight)
-                
+            animations: { () -> Void in
+            self.frame = CGRectMake(0, 0, rect.size.width, YSLNoticeAleartHeight)
             }) {(finished) -> Void in
         }
-        
+
         // Dismiss Animation
-        var dispatchTime : dispatch_time_t = dispatch_time(DISPATCH_TIME_NOW, Int64(2.0 * Double(NSEC_PER_SEC)))
-        dispatch_after(dispatchTime, dispatch_get_main_queue(), {
-            // your function here
-            [unowned self] in
-            self.dissmissAlert()
-        })
+        NSTimer.scheduledTimerWithTimeInterval(2.0,
+            target: self,
+            selector: Selector("dissmissAlert"),
+            userInfo: nil,
+            repeats: false)
     }
     
-    private func dissmissAlert () {
-        let rect = UIScreen.mainScreen().bounds
-        UIView.animateWithDuration(0.25,delay: 0.0, options: UIViewAnimationOptions.CurveEaseInOut,
-            animations: {[unowned self] () -> Void in
-            self.frame = CGRectMake(0, -kAleartHeight, rect.size.width, kAleartHeight)
-            }) { [unowned self](finished) -> Void in
-                self.removeFromSuperview()
+    @objc private func dissmissAlertHandler () {
+        if ((self.callback) != nil) {
+            self.callback!()
+        }
+        self.dissmissAlert()
+    }
+    
+    @objc private func dissmissAlert () {
+                
+        if titleLabel != nil {
+            let rect = UIScreen.mainScreen().bounds
+            UIView.animateWithDuration(0.25,delay: 0.0, options: UIViewAnimationOptions.CurveEaseInOut,
+                animations: { () -> Void in
+                    self.frame = CGRectMake(0, -YSLNoticeAleartHeight, rect.size.width, YSLNoticeAleartHeight)
+                }) { (finished) -> Void in
+                    self.titleLabel = nil
+                    self.subTitleLabel = nil;
+                    self.removeFromSuperview()
+            }
         }
     }
-    
-    
 }
+

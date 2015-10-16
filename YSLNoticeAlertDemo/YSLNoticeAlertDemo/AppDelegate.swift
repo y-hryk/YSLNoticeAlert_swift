@@ -16,6 +16,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         // Override point for customization after application launch.
+        
+        // YSLNoticeAlert Setting
+//        YSLNoticeAlert.titleFont = UIFont(name: "Futura-CondensedExtraBold", size: 16)
+//        YSLNoticeAlert.subTitleFont = UIFont(name: "Futura-Medium", size: 14)
+//        YSLNoticeAlert.titleTextColor = UIColor.whiteColor()
+//        YSLNoticeAlert.subTitleTextColor = UIColor.whiteColor()
+
         return true
     }
 
